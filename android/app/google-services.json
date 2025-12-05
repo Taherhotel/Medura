@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "372872315566",
+    "project_id": "medura-d7973",
+    "storage_bucket": "medura-d7973.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372872315566:android:99f171cc6f1ed4f04f233f",
+        "android_client_info": {
+          "package_name": "com.example.smart_healthcare_alert"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA7nqdqV__occ0-qgOYEGSYnZcmzPG8qw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
