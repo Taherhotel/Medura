@@ -1,10 +1,52 @@
 import 'package:flutter/material.dart';
 import '../widgets/vital_card.dart';
+import '../widgets/fall_detection_card.dart';
+import '../services/alert_service.dart';
+import '../models/alert.dart';
 
 class HomeView extends StatelessWidget {
   final String userName;
 
   const HomeView({super.key, required this.userName});
+
+  Future<void> _sendSOS(BuildContext context) async {
+    final alertService = AlertService();
+
+    // Create a real SOS alert
+    final sosAlert = Alert(
+      id: '', // Firestore generates this
+      patientId: 'current_user_id', // Ideally fetch real ID
+      patientName: userName,
+      type: AlertType.sos,
+      severity: AlertSeverity.critical,
+      timestamp: DateTime.now(),
+      status: AlertStatus.newAlert,
+      message: 'SOS Triggered by $userName! Immediate help needed.',
+    );
+
+    try {
+      await alertService.createAlert(sosAlert);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('SOS Alert Sent to Caregiver!'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to send SOS: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +64,11 @@ class HomeView extends StatelessWidget {
                 children: [
                   Text(
                     'Welcome back,',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
                     userName,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ],
               ),
@@ -40,8 +77,7 @@ class HomeView extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color:
-                        Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                    color: Theme.of(context).colorScheme.secondary,
                     width: 2,
                   ),
                 ),
@@ -56,69 +92,72 @@ class HomeView extends StatelessWidget {
           ),
           const SizedBox(height: 32),
 
+          // Fall Detection Card (New Feature)
+          const FallDetectionCard(),
+          const SizedBox(height: 24),
+
           // Emergency SOS Section
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.red[400]!, Colors.red[600]!],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          GestureDetector(
+            onTap: () => _sendSOS(context),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.red[400]!, Colors.red[600]!],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.red.withValues(alpha: 0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.sos, color: Colors.white, size: 32),
                   ),
-                  child: const Icon(
-                    Icons.sos,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Emergency Help',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Press for immediate assistance',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_ios,
                     color: Colors.white,
-                    size: 32,
+                    size: 20,
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Emergency Help',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Press for immediate assistance',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -130,9 +169,9 @@ class HomeView extends StatelessWidget {
             children: [
               Text(
                 'Your Vitals',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               TextButton(onPressed: () {}, child: const Text('See All')),
             ],

@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'edit_profile_screen.dart';
 import '../services/database_service.dart';
+import '../services/theme_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -47,6 +49,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _showSettingsDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return AlertDialog(
+              title: const Text('App Settings'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SwitchListTile(
+                    title: const Text('Dark Mode'),
+                    value: themeProvider.isDarkMode,
+                    onChanged: (value) {
+                      themeProvider.toggleTheme(value);
+                    },
+                    secondary: Icon(
+                      themeProvider.isDarkMode
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Text Size'),
+                  Slider(
+                    value: themeProvider.textScaleFactor,
+                    min: 0.8,
+                    max: 1.4,
+                    divisions: 3,
+                    label: themeProvider.textScaleFactor.toString(),
+                    onChanged: (value) {
+                      themeProvider.setTextScale(value);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Small', style: TextStyle(fontSize: 12)),
+                      Text('Large', style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
@@ -77,7 +136,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(width: 48), // Spacer for balance
+                      IconButton(
+                        onPressed: _showSettingsDialog,
+                        icon: const Icon(Icons.settings_outlined),
+                        color: Theme.of(context).iconTheme.color,
+                      ),
                       Text(
                         'Profile',
                         style: Theme.of(context).textTheme.headlineSmall
@@ -86,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       IconButton(
                         onPressed: () => _navigateToEditProfile(profileData),
                         icon: const Icon(Icons.edit_rounded),
-                        color: Theme.of(context).primaryColor,
+                        color: Theme.of(context).iconTheme.color,
                       ),
                     ],
                   ),
@@ -203,11 +266,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardTheme.color,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withValues(alpha: 0.05),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -217,8 +280,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         CircleAvatar(
                           radius: 24,
-                          backgroundColor: Colors.blue[50],
-                          child: const Icon(Icons.person, color: Colors.blue),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.3),
+                          child: Icon(
+                            Icons.person,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -232,8 +300,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               Text(
                                 profileData['caretakerRelation'] ?? '',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.grey[500]),
+                                style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
                           ),
@@ -241,8 +308,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         IconButton(
                           onPressed: () {},
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.green[50],
-                            foregroundColor: Colors.green,
+                            backgroundColor: Colors.green.withOpacity(0.2),
+                            foregroundColor: Colors.greenAccent,
                           ),
                           icon: const Icon(Icons.phone),
                         ),
@@ -315,35 +382,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildStatCard(
     BuildContext context,
-    String label,
+    String title,
     String value,
     String unit,
   ) {
     return Column(
       children: [
         Text(
-          value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).primaryColor,
+          title,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Colors.grey[400],
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 4),
-        RichText(
-          text: TextSpan(
-            text: label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-            children: unit.isNotEmpty
-                ? [
-                    TextSpan(
-                      text: ' ($unit)',
-                      style: const TextStyle(fontSize: 10),
-                    ),
-                  ]
-                : [],
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            if (unit.isNotEmpty) ...[
+              const SizedBox(width: 2),
+              Text(
+                unit,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+              ),
+            ],
+          ],
         ),
       ],
     );

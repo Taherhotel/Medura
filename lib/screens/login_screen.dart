@@ -76,10 +76,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Image.asset('AarogyaDoot.png', height: 100),
+                  const SizedBox(height: 16),
                   Text(
                     'Medura',
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).colorScheme.secondary,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -234,12 +236,12 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-              : Colors.grey[50],
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+              : Theme.of(context).cardTheme.color,
           border: Border.all(
             color: isSelected
-                ? Theme.of(context).primaryColor
-                : Colors.grey[300]!,
+                ? Theme.of(context).colorScheme.secondary
+                : Colors.grey[700]!,
             width: 2,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -249,8 +251,8 @@ class _LoginScreenState extends State<LoginScreen> {
             Icon(
               icon,
               color: isSelected
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey[600],
+                  ? Theme.of(context).colorScheme.secondary
+                  : Colors.grey[400],
               size: 32,
             ),
             const SizedBox(height: 8),
@@ -258,8 +260,8 @@ class _LoginScreenState extends State<LoginScreen> {
               title,
               style: TextStyle(
                 color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey[600],
+                    ? Theme.of(context).colorScheme.secondary
+                    : Colors.grey[400],
                 fontWeight: FontWeight.bold,
               ),
             ),

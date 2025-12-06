@@ -11,7 +11,7 @@ plugins {
 android {
     namespace = "com.example.smart_healthcare_alert"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

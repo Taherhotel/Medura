@@ -20,11 +20,11 @@ class VitalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
+            color: Colors.black.withValues(alpha: 0.1),
             spreadRadius: 2,
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -48,19 +48,19 @@ class VitalCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
+                        color: color.withOpacity(0.2),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(icon, size: 24, color: color),
                     ),
-                    Icon(Icons.more_horiz, color: Colors.grey[400], size: 20),
+                    Icon(Icons.more_horiz, color: Colors.grey[500], size: 20),
                   ],
                 ),
                 const Spacer(),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
+                    color: Colors.grey[400],
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -74,7 +74,7 @@ class VitalCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 24,
                           ),
                     ),
