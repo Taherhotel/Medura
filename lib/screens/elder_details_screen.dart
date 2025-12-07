@@ -37,119 +37,173 @@ class _ElderDetailsScreenState extends State<ElderDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              expandedHeight: 200.0,
-              floating: false,
-              pinned: true,
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
-              elevation: 0,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: true,
-                title: Text(
-                  widget.elderName,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
+    // Enforce Light Theme for Elder Details Screen (Caregiver View)
+    return Theme(
+      data: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00BFA6),
+          primary: const Color(0xFF00BFA6),
+          secondary: const Color.fromARGB(255, 244, 245, 246),
+          surface: const Color(0xFFF8F9FA),
+          error: const Color(0xFFFF5252),
+          brightness: Brightness.light,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.black87),
+          titleTextStyle: TextStyle(
+            color: Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          color: Colors.white,
+          surfaceTintColor: Colors.white,
+        ),
+        iconTheme: const IconThemeData(color: Colors.black87),
+        textTheme: const TextTheme(
+          headlineSmall: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+          headlineMedium: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+          titleLarge: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+          bodyMedium: TextStyle(color: Colors.black87),
+          bodySmall: TextStyle(color: Colors.grey),
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                expandedHeight: 200.0,
+                floating: false,
+                pinned: true,
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black87,
+                elevation: 0,
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  title: Text(
+                    widget.elderName,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Container(color: Colors.grey[50]),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 40),
-                          Hero(
-                            tag: 'avatar_${widget.elderId}',
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Theme.of(context).primaryColor,
-                                  width: 2,
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(color: Colors.grey[50]),
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 40),
+                            Hero(
+                              tag: 'avatar_${widget.elderId}',
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context).primaryColor,
+                                    width: 2,
+                                  ),
                                 ),
-                              ),
-                              child: const CircleAvatar(
-                                radius: 40,
-                                backgroundImage: NetworkImage(
-                                  'https://i.pravatar.cc/150?img=11',
+                                child: const CircleAvatar(
+                                  radius: 40,
+                                  backgroundImage: NetworkImage(
+                                    'https://i.pravatar.cc/150?img=11',
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SliverPersistentHeader(
-              delegate: _SliverAppBarDelegate(
-                TabBar(
-                  controller: _tabController,
-                  labelColor: Theme.of(context).primaryColor,
-                  unselectedLabelColor: Colors.grey,
-                  indicatorColor: Theme.of(context).primaryColor,
-                  indicatorSize: TabBarIndicatorSize.label,
-                  indicatorWeight: 3,
-                  tabs: const [
-                    Tab(icon: Icon(Icons.show_chart_rounded), text: 'Monitor'),
-                    Tab(
-                      icon: Icon(Icons.monitor_heart_outlined),
-                      text: 'Vitals',
-                    ),
-                    Tab(icon: Icon(Icons.medication_outlined), text: 'Meds'),
-                    Tab(icon: Icon(Icons.person_outline), text: 'Profile'),
-                  ],
+              SliverPersistentHeader(
+                delegate: _SliverAppBarDelegate(
+                  TabBar(
+                    controller: _tabController,
+                    labelColor: Theme.of(context).primaryColor,
+                    unselectedLabelColor: Colors.grey,
+                    indicatorColor: Theme.of(context).primaryColor,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    indicatorWeight: 3,
+                    tabs: const [
+                      Tab(
+                        icon: Icon(Icons.show_chart_rounded),
+                        text: 'Monitor',
+                      ),
+                      Tab(
+                        icon: Icon(Icons.monitor_heart_outlined),
+                        text: 'Vitals',
+                      ),
+                      Tab(icon: Icon(Icons.medication_outlined), text: 'Meds'),
+                      Tab(icon: Icon(Icons.person_outline), text: 'Profile'),
+                    ],
+                  ),
+                ),
+                pinned: true,
+              ),
+            ];
+          },
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              // Monitor Tab
+              const LiveMonitorDashboard(),
+              // Vitals Tab
+              _buildVitalsTab(),
+              // Medications Tab
+              Scaffold(
+                backgroundColor: Colors.transparent,
+                body: MedicationScheduleScreen(
+                  userId: widget.elderId,
+                  isCaregiverView: true,
+                ),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AddMedicationScreen(elderId: widget.elderId),
+                      ),
+                    );
+                  },
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  child: const Icon(Icons.add),
                 ),
               ),
-              pinned: true,
-            ),
-          ];
-        },
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            // Monitor Tab
-            const LiveMonitorDashboard(),
-            // Vitals Tab
-            _buildVitalsTab(),
-            // Medications Tab
-            Scaffold(
-              backgroundColor: Colors.transparent,
-              body: MedicationScheduleScreen(
-                userId: widget.elderId,
-                isCaregiverView: true,
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          AddMedicationScreen(elderId: widget.elderId),
-                    ),
-                  );
-                },
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                child: const Icon(Icons.add),
-              ),
-            ),
-            // Profile Tab
-            ProfileScreen(userId: widget.elderId),
-          ],
+              // Profile Tab
+              ProfileScreen(userId: widget.elderId),
+            ],
+          ),
         ),
       ),
     );

@@ -19,22 +19,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _caretakerNameController;
   late TextEditingController _caretakerRelationController;
   late TextEditingController _allergiesController;
+  late TextEditingController _medicalConditionsController;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.currentData['name']);
     _ageController = TextEditingController(text: widget.currentData['age']);
-    _weightController = TextEditingController(text: widget.currentData['weight']);
-    _heightController = TextEditingController(text: widget.currentData['height']);
-    _bloodTypeController =
-        TextEditingController(text: widget.currentData['bloodType']);
-    _caretakerNameController =
-        TextEditingController(text: widget.currentData['caretakerName']);
-    _caretakerRelationController =
-        TextEditingController(text: widget.currentData['caretakerRelation']);
-    _allergiesController =
-        TextEditingController(text: widget.currentData['allergies']);
+    _weightController = TextEditingController(
+      text: widget.currentData['weight'],
+    );
+    _heightController = TextEditingController(
+      text: widget.currentData['height'],
+    );
+    _bloodTypeController = TextEditingController(
+      text: widget.currentData['bloodType'],
+    );
+    _caretakerNameController = TextEditingController(
+      text: widget.currentData['caretakerName'],
+    );
+    _caretakerRelationController = TextEditingController(
+      text: widget.currentData['caretakerRelation'],
+    );
+    _allergiesController = TextEditingController(
+      text: widget.currentData['allergies'],
+    );
+    _medicalConditionsController = TextEditingController(
+      text: widget.currentData['medicalConditions'],
+    );
   }
 
   @override
@@ -47,6 +59,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _caretakerNameController.dispose();
     _caretakerRelationController.dispose();
     _allergiesController.dispose();
+    _medicalConditionsController.dispose();
     super.dispose();
   }
 
@@ -68,10 +81,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   'caretakerName': _caretakerNameController.text,
                   'caretakerRelation': _caretakerRelationController.text,
                   'allergies': _allergiesController.text,
+                  'medicalConditions': _medicalConditionsController.text,
                 });
               }
             },
-            child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Save',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -84,16 +101,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _buildTextField('Name', _nameController),
             Row(
               children: [
-                Expanded(child: _buildTextField('Age', _ageController, keyboardType: TextInputType.number)),
+                Expanded(
+                  child: _buildTextField(
+                    'Age',
+                    _ageController,
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
                 const SizedBox(width: 16),
-                Expanded(child: _buildTextField('Blood Type', _bloodTypeController)),
+                Expanded(
+                  child: _buildTextField('Blood Type', _bloodTypeController),
+                ),
               ],
             ),
             Row(
               children: [
-                Expanded(child: _buildTextField('Weight (kg)', _weightController, keyboardType: TextInputType.number)),
+                Expanded(
+                  child: _buildTextField(
+                    'Weight (kg)',
+                    _weightController,
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
                 const SizedBox(width: 16),
-                Expanded(child: _buildTextField('Height (cm)', _heightController, keyboardType: TextInputType.number)),
+                Expanded(
+                  child: _buildTextField(
+                    'Height (cm)',
+                    _heightController,
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -102,6 +139,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _buildTextField('Relation', _caretakerRelationController),
             const SizedBox(height: 24),
             _buildSectionHeader('Medical Notes'),
+            _buildTextField(
+              'Medical Conditions',
+              _medicalConditionsController,
+              maxLines: 3,
+            ),
             _buildTextField('Allergies', _allergiesController, maxLines: 3),
           ],
         ),
@@ -115,28 +157,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.bold,
-            ),
+          color: Theme.of(context).primaryColor,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {TextInputType? keyboardType, int maxLines = 1}) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Theme.of(context).dividerColor),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Theme.of(context).dividerColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 2,
+            ),
           ),
           filled: true,
-          fillColor: Colors.grey[50],
+          fillColor: Theme.of(context).cardTheme.color,
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {

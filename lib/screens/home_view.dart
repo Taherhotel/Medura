@@ -92,10 +92,6 @@ class HomeView extends StatelessWidget {
           ),
           const SizedBox(height: 32),
 
-          // Fall Detection Card (New Feature)
-          const FallDetectionCard(),
-          const SizedBox(height: 24),
-
           // Emergency SOS Section
           GestureDetector(
             onTap: () => _sendSOS(context),
@@ -217,6 +213,11 @@ class HomeView extends StatelessWidget {
               ),
             ],
           ),
+
+          const SizedBox(height: 24),
+
+          // Fall Detection Card (New Feature)
+          const FallDetectionCard(),
         ],
       ),
     );

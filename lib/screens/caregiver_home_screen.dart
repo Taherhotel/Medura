@@ -14,211 +14,305 @@ class CaregiverHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
-    final alertService = AlertService();
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: StreamBuilder<List<Alert>>(
-          stream: alertService.getAlertsForCaregiver(),
-          builder: (context, alertSnapshot) {
-            final alerts = alertSnapshot.data ?? [];
-            final unreadCount = alerts
-                .where((a) => a.status == AlertStatus.newAlert)
-                .length;
-
-            return CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  floating: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  elevation: 0,
-                  automaticallyImplyLeading: false,
-                  toolbarHeight: 70, // Increased height for better spacing
-                  title: StreamBuilder<DocumentSnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userId)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      String userName = 'Caregiver';
-
-                      // Gracefully handle errors or loading states by falling back to default
-                      if (snapshot.hasData && snapshot.data!.exists) {
-                        final data =
-                            snapshot.data!.data() as Map<String, dynamic>;
-                        userName = data['name'] ?? 'Caregiver';
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 12.0),
-                              child: Image.asset('AarogyaDoot.png', height: 45),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Welcome Back,',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                Text(
-                                  userName,
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  actions: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 30.0),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AlertsScreen(),
-                                ),
-                              );
-                            },
-                            icon: Icon(
-                              Icons.notifications_outlined,
-                              color: Theme.of(context).iconTheme.color,
-                            ),
-                          ),
-                          if (unreadCount > 0)
-                            Positioned(
-                              right: 8,
-                              top: 8,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
-                                child: Text(
-                                  unreadCount > 9 ? '9+' : '$unreadCount',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 30.0, right: 8.0),
-                      child: IconButton(
-                        onPressed: () async {
-                          await authService.signOut();
-                          if (context.mounted) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => const AuthWrapper(),
-                              ),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.logout, color: Colors.redAccent),
-                      ),
-                    ),
-                  ],
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: _buildQuickStats(context, unreadCount),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      'Assigned Elders',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .where('role', isEqualTo: 'elder')
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      // If it's a network error, we might want to show a cached view or a friendly message
-                      return SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Center(
-                            child: Text(
-                              'Unable to load elders. Please check your connection.',
-                              style: TextStyle(color: Colors.red[300]),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SliverToBoxAdapter(
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const SliverToBoxAdapter(
-                        child: Center(child: Text('No elders assigned')),
-                      );
-                    }
-
-                    return SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final elder = snapshot.data!.docs[index];
-                        return _buildElderCard(context, elder);
-                      }, childCount: snapshot.data!.docs.length),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
+    // Enforce Light Theme for Caregiver
+    return Theme(
+      data: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00BFA6),
+          primary: const Color(0xFF00BFA6),
+          secondary: const Color.fromARGB(255, 244, 245, 246),
+          surface: const Color(0xFFF8F9FA),
+          error: const Color(0xFFFF5252),
+          brightness: Brightness.light,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.black87),
+          titleTextStyle: TextStyle(
+            color: Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          color: Colors.white,
+          surfaceTintColor: Colors.white,
+        ),
+        iconTheme: const IconThemeData(color: Colors.black87),
+        textTheme: const TextTheme(
+          headlineSmall: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+          headlineMedium: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+          titleLarge: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+          bodyMedium: TextStyle(color: Colors.black87),
+          bodySmall: TextStyle(color: Colors.grey),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        label: const Text('Add Elder'),
-        icon: const Icon(Icons.add),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
+      child: Builder(
+        builder: (context) {
+          final authService = AuthService();
+          final alertService = AlertService();
+
+          return Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            body: SafeArea(
+              child: StreamBuilder<List<Alert>>(
+                stream: alertService.getAlertsForCaregiver(),
+                builder: (context, alertSnapshot) {
+                  final alerts = alertSnapshot.data ?? [];
+                  final unreadCount = alerts
+                      .where((a) => a.status == AlertStatus.newAlert)
+                      .length;
+
+                  return StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .where('role', isEqualTo: 'elder')
+                        .snapshots(),
+                    builder: (context, elderSnapshot) {
+                      final elderCount = elderSnapshot.hasData
+                          ? elderSnapshot.data!.docs.length
+                          : 0;
+
+                      return CustomScrollView(
+                        slivers: [
+                          SliverAppBar(
+                            floating: true,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).scaffoldBackgroundColor,
+                            elevation: 0,
+                            automaticallyImplyLeading: false,
+                            toolbarHeight:
+                                70, // Increased height for better spacing
+                            title: StreamBuilder<DocumentSnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(userId)
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                String userName = 'Caregiver';
+
+                                // Gracefully handle errors or loading states by falling back to default
+                                if (snapshot.hasData && snapshot.data!.exists) {
+                                  final data =
+                                      snapshot.data!.data()
+                                          as Map<String, dynamic>;
+                                  userName = data['name'] ?? 'Caregiver';
+                                }
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 30.0),
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 12.0,
+                                        ),
+                                        child: Image.asset(
+                                          'AarogyaDoot.png',
+                                          height: 45,
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Welcome Back,',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
+                                          ),
+                                          Text(
+                                            userName,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            actions: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 30.0),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const AlertsScreen(),
+                                          ),
+                                        );
+                                      },
+                                      icon: Icon(
+                                        Icons.notifications_outlined,
+                                        color: Theme.of(
+                                          context,
+                                        ).iconTheme.color,
+                                      ),
+                                    ),
+                                    if (unreadCount > 0)
+                                      Positioned(
+                                        right: 8,
+                                        top: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          constraints: const BoxConstraints(
+                                            minWidth: 16,
+                                            minHeight: 16,
+                                          ),
+                                          child: Text(
+                                            unreadCount > 9
+                                                ? '9+'
+                                                : '$unreadCount',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 30.0,
+                                  right: 8.0,
+                                ),
+                                child: IconButton(
+                                  onPressed: () async {
+                                    await authService.signOut();
+                                    if (context.mounted) {
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(
+                                          builder: (_) => const AuthWrapper(),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  icon: const Icon(
+                                    Icons.logout,
+                                    color: Colors.redAccent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: _buildQuickStats(
+                                context,
+                                unreadCount,
+                                elderCount,
+                              ),
+                            ),
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            sliver: SliverToBoxAdapter(
+                              child: Text(
+                                'Assigned Elders',
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                          if (elderSnapshot.hasError)
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Center(
+                                  child: Text(
+                                    'Unable to load elders. Please check your connection.',
+                                    style: TextStyle(color: Colors.red[300]),
+                                  ),
+                                ),
+                              ),
+                            )
+                          else if (elderSnapshot.connectionState ==
+                              ConnectionState.waiting)
+                            const SliverToBoxAdapter(
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          else if (!elderSnapshot.hasData ||
+                              elderSnapshot.data!.docs.isEmpty)
+                            const SliverToBoxAdapter(
+                              child: Center(child: Text('No elders assigned')),
+                            )
+                          else
+                            SliverList(
+                              delegate: SliverChildBuilderDelegate((
+                                context,
+                                index,
+                              ) {
+                                final elder = elderSnapshot.data!.docs[index];
+                                return _buildElderCard(context, elder);
+                              }, childCount: elderSnapshot.data!.docs.length),
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: () {},
+              label: const Text('Add Elder'),
+              icon: const Icon(Icons.add),
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildQuickStats(BuildContext context, int unreadCount) {
+  Widget _buildQuickStats(
+    BuildContext context,
+    int unreadCount,
+    int elderCount,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -235,7 +329,7 @@ class CaregiverHomeScreen extends StatelessWidget {
           child: _buildStatContainer(
             context,
             'Total Patients',
-            '2', // Mock for now
+            elderCount.toString(),
             Icons.people_alt,
             Colors.blue,
           ),

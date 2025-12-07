@@ -35,6 +35,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // No need to force initialization here as AuthService handles creation
   }
 
+  String _formatUserId(String id) {
+    if (id.length <= 8) return id.toUpperCase();
+    return id.substring(0, 8).toUpperCase();
+  }
+
   Future<void> _navigateToEditProfile(Map<String, dynamic> currentData) async {
     final result = await Navigator.push(
       context,
@@ -155,108 +160,135 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Profile Image & Name
-                  Stack(
-                    alignment: Alignment.bottomRight,
+                  // Profile Header (Row Layout)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).primaryColor,
-                            width: 3,
-                          ),
-                        ),
-                        child: const CircleAvatar(
-                          radius: 60,
-                          backgroundImage: NetworkImage(
-                            'https://i.pravatar.cc/150?img=11',
-                          ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              profileData['name'] ?? 'User',
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Medura ID: ${_formatUserId(widget.userId)}',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.grey[500],
+                                    fontFamily: 'monospace',
+                                    letterSpacing: 0.5,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => _navigateToEditProfile(profileData),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
+                      const SizedBox(width: 16),
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 3,
+                              ),
+                            ),
+                            child: const CircleAvatar(
+                              radius: 45, // Reduced size
+                              backgroundImage: NetworkImage(
+                                'https://i.pravatar.cc/150?img=11',
+                              ),
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                            size: 20,
+                          GestureDetector(
+                            onTap: () => _navigateToEditProfile(profileData),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    profileData['name'] ?? 'User',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  Text(
-                    'ID: ${widget.userId}',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
                   ),
                   const SizedBox(height: 32),
 
                   // Personal Stats Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildStatCard(
-                        context,
-                        'Age',
-                        profileData['age'] ?? '-',
-                        'yrs',
-                      ),
-                      _buildStatCard(
-                        context,
-                        'Weight',
-                        profileData['weight'] ?? '-',
-                        'kg',
-                      ),
-                      _buildStatCard(
-                        context,
-                        'Height',
-                        profileData['height'] ?? '-',
-                        'cm',
-                      ),
-                      _buildStatCard(
-                        context,
-                        'Blood',
-                        profileData['bloodType'] ?? '-',
-                        '',
-                      ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardTheme.color,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildStatCard(
+                          context,
+                          'Age',
+                          profileData['age'] ?? '-',
+                          'yrs',
+                        ),
+                        _buildVerticalDivider(),
+                        _buildStatCard(
+                          context,
+                          'Weight',
+                          profileData['weight'] ?? '-',
+                          'kg',
+                        ),
+                        _buildVerticalDivider(),
+                        _buildStatCard(
+                          context,
+                          'Height',
+                          profileData['height'] ?? '-',
+                          'cm',
+                        ),
+                        _buildVerticalDivider(),
+                        _buildStatCard(
+                          context,
+                          'Blood',
+                          profileData['bloodType'] ?? '-',
+                          '',
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 32),
 
-                  // Medical Conditions
-                  _buildSectionHeader(context, 'Medical Conditions'),
+                  // Medical History
+                  _buildSectionHeader(context, 'Medical History'),
                   const SizedBox(height: 12),
                   Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      _buildConditionChip(
-                        context,
-                        'Hypertension',
-                        Colors.orange,
-                      ),
-                      _buildConditionChip(
-                        context,
-                        'Type 2 Diabetes',
-                        Colors.blue,
-                      ),
-                      _buildConditionChip(context, 'Arthritis', Colors.purple),
-                    ],
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _buildDynamicConditionChips(context),
                   ),
                   const SizedBox(height: 32),
 
@@ -380,6 +412,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _buildVerticalDivider() {
+    return Container(height: 30, width: 1, color: Colors.grey.withOpacity(0.2));
+  }
+
   Widget _buildStatCard(
     BuildContext context,
     String title,
@@ -420,6 +456,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
+  }
+
+  List<Widget> _buildDynamicConditionChips(BuildContext context) {
+    String conditionsText = profileData['medicalConditions'] ?? '';
+    if (conditionsText.isEmpty) {
+      return [
+        Text(
+          'No conditions listed',
+          style: TextStyle(
+            color: Colors.grey[500],
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ];
+    }
+
+    // Split by comma or newline
+    List<String> conditions = conditionsText.split(RegExp(r'[,\n]'));
+
+    // Define a palette of colors to cycle through
+    final colors = [
+      Colors.orange,
+      Colors.blue,
+      Colors.purple,
+      Colors.red,
+      Colors.teal,
+    ];
+
+    return conditions.where((c) => c.trim().isNotEmpty).map((condition) {
+      final index = conditions.indexOf(condition) % colors.length;
+      return _buildConditionChip(context, condition.trim(), colors[index]);
+    }).toList();
   }
 
   Widget _buildConditionChip(BuildContext context, String label, Color color) {

@@ -88,7 +88,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SafeArea(child: screens[_selectedIndex]),
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.tertiary
+            : Colors.white,
         indicatorColor: Theme.of(context).colorScheme.secondary,
         elevation: 0,
         selectedIndex: _selectedIndex,
