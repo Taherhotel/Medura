@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'profile_screen.dart';
 import '../widgets/vital_card.dart';
+import '../widgets/fall_detection_card.dart';
 import 'add_medication_screen.dart';
 import 'medication_schedule_screen.dart';
 import '../widgets/live_monitor_dashboard.dart';
@@ -222,44 +224,71 @@ class _ElderDetailsScreenState extends State<ElderDetailsScreen>
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.85,
-            children: const [
-              VitalCard(
-                title: 'Heart Rate',
-                value: '72',
-                unit: 'bpm',
-                icon: Icons.favorite_rounded,
-                color: Colors.redAccent,
-              ),
-              VitalCard(
-                title: 'Blood Pressure',
-                value: '120/80',
-                unit: 'mmHg',
-                icon: Icons.water_drop_rounded,
-                color: Colors.pinkAccent,
-              ),
-              VitalCard(
-                title: 'Temperature',
-                value: '36.6',
-                unit: '°C',
-                icon: Icons.thermostat_rounded,
-                color: Colors.orangeAccent,
-              ),
-              VitalCard(
-                title: 'SpO2',
-                value: '98',
-                unit: '%',
-                icon: Icons.air_rounded,
-                color: Colors.lightBlueAccent,
-              ),
-            ],
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('devices')
+                .doc('esp32_medura_01')
+                .collection('readings')
+                .orderBy('ts', descending: true)
+                .limit(1)
+                .snapshots(),
+            builder: (context, snapshot) {
+              String heartRate = '--';
+              String aqi = '--';
+              String temperature = '--';
+              String spo2 = '--';
+
+              if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                final data =
+                    snapshot.data!.docs.first.data() as Map<String, dynamic>;
+                heartRate = data['heartRate']?.toString() ?? '--';
+                aqi = data['gasAQI']?.toString() ?? '--';
+                temperature = data['temperature']?.toString() ?? '--';
+                spo2 = data['spo2']?.toString() ?? '--';
+              }
+
+              return GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.85,
+                children: [
+                  VitalCard(
+                    title: 'Heart Rate',
+                    value: heartRate,
+                    unit: 'bpm',
+                    icon: Icons.favorite_rounded,
+                    color: Colors.redAccent,
+                  ),
+                  VitalCard(
+                    title: 'AQI',
+                    value: aqi,
+                    unit: '',
+                    icon: Icons.cloud_outlined,
+                    color: Colors.green,
+                  ),
+                  VitalCard(
+                    title: 'Temperature',
+                    value: temperature,
+                    unit: '°C',
+                    icon: Icons.thermostat_rounded,
+                    color: Colors.orangeAccent,
+                  ),
+                  VitalCard(
+                    title: 'SpO2',
+                    value: spo2,
+                    unit: '%',
+                    icon: Icons.air_rounded,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ],
+              );
+            },
           ),
+          const SizedBox(height: 24),
+          const FallDetectionCard(useFirestoreData: true),
         ],
       ),
     );
